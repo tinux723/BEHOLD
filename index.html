@@ -1,0 +1,338 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Behold</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A picture-word game where every answer points to Jesus Christ. 24 levels with a KJV verse for each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+/* Layout: one phone-width column like a stained-glass window: four glass panes up top, answer slots, then the letter tray. Deliberately single-theme (night window). */
+:root{
+  --night:#0E1A3A; --night-2:#16275A; --lead:#071029; --gold:#F2C14E; --gold-2:#C9962B;
+  --tile:#F7F1E3; --tile-ink:#16275A; --ink:#EEF2FF; --muted:#A9B6DA; --good:#5BD49A; --bad:#FF8A80;
+  --glass-1:#BFDBFE; --glass-2:#FBCFE8; --glass-3:#BBF7D0; --glass-4:#FDE68A;
+  --display:"Cinzel",Georgia,"Times New Roman",serif;
+  --body:"Nunito","Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0;background:radial-gradient(120% 70% at 50% 0%,var(--night-2),var(--night) 60%) var(--night);background-attachment:fixed;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 28px;display:flex;flex-direction:column;gap:14px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.5rem;letter-spacing:.06em;color:var(--gold);margin:0;line-height:1}
+.brand small{display:block;font-family:var(--body);font-weight:700;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 12px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.coin{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFE7A3,var(--gold) 55%,var(--gold-2));box-shadow:inset 0 0 0 1.5px #A87A1E}
+.iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.9rem}
+.lvl{font-weight:800;color:var(--muted);font-size:.9rem;text-align:center;letter-spacing:.08em;text-transform:uppercase}
+.window{background:var(--lead);padding:8px;border-radius:22px 22px 14px 14px;box-shadow:0 0 0 2px #2A3B73,0 18px 40px rgba(0,0,0,.35)}
+.panes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pane{aspect-ratio:1;max-width:100%;border-radius:12px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 3px rgba(7,16,41,.35),inset 0 0 28px rgba(255,255,255,.55)}
+.pane:nth-child(1){background:var(--glass-1)}.pane:nth-child(2){background:var(--glass-2)}.pane:nth-child(3){background:var(--glass-3)}.pane:nth-child(4){background:var(--glass-4)}
+.pane svg{width:100%;height:100%;display:block}
+.slots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;min-height:52px}
+.slot{width:42px;height:50px;border-radius:9px;border:2px solid rgba(255,255,255,.22);background:rgba(7,16,41,.55);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1.5rem;color:var(--ink);padding:0}
+.slot.filled{background:var(--tile);color:var(--tile-ink);border-color:var(--tile)}
+.slot.hinted{background:var(--gold);border-color:var(--gold);color:var(--lead);cursor:default}
+.slots.wrong .slot{border-color:var(--bad);color:var(--bad)}
+.slots.wrong .slot.filled{background:#FFE4E1;color:#9B1C1C}
+.slots.right .slot{background:var(--good);border-color:var(--good);color:var(--lead)}
+@media (prefers-reduced-motion:no-preference){.slots.wrong{animation:shake .4s}.tile{transition:transform .08s}.tile:active{transform:scale(.94)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.tray{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.tile{aspect-ratio:1;border:0;border-radius:10px;background:var(--tile);color:var(--tile-ink);font-family:var(--display);font-weight:800;font-size:1.45rem;box-shadow:0 4px 0 #C9BDA0;padding:0}
+.tile.used{visibility:hidden}
+.tools{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.tool{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:9px 14px;font-weight:800;font-size:.95rem}
+.tool .cost{display:inline-flex;align-items:center;gap:4px;color:var(--gold);font-variant-numeric:tabular-nums}
+.tool:disabled{opacity:.45;cursor:default}
+.msg{text-align:center;min-height:1.3em;color:var(--muted);font-weight:700;font-size:.92rem;margin:0}
+/* reveal card */
+.overlay{position:fixed;inset:0;background:rgba(4,9,24,.72);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:20}
+.card{width:100%;max-width:420px;background:linear-gradient(180deg,#1B2E66,#122150);border:1px solid #33478A;border-radius:20px;padding:22px 20px;text-align:center;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);max-height:100%;overflow:auto}
+.card .k{font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.75rem;color:var(--muted)}
+.card h2{font-family:var(--display);font-weight:800;font-size:2.2rem;letter-spacing:.08em;color:var(--gold);margin:0;line-height:1.1}
+.card blockquote{margin:0;font-family:var(--display);font-weight:600;font-size:1.08rem;line-height:1.5;color:var(--ink);text-wrap:balance}
+.card cite{font-style:normal;font-weight:800;color:var(--gold);font-size:.9rem;letter-spacing:.06em}
+.card p{margin:0;color:var(--muted);font-size:.95rem;text-wrap:pretty}
+.earn{display:inline-flex;align-items:center;gap:6px;justify-content:center;font-weight:800;color:var(--gold)}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:900;font-size:1rem;background:var(--gold);color:var(--lead);box-shadow:0 4px 0 var(--gold-2)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.2)}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+/* level map */
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
+.mapbtn{aspect-ratio:1;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:900;font-size:1.2rem;padding:4px}
+.mapbtn small{font-family:var(--display);font-size:.62rem;letter-spacing:.06em;color:var(--gold);font-weight:800;line-height:1.1;overflow-wrap:anywhere}
+.mapbtn.done{background:rgba(242,193,78,.14);border-color:rgba(242,193,78,.5)}
+.mapbtn.locked{opacity:.4;cursor:default}
+.mapbtn.cur{box-shadow:0 0 0 2px var(--gold)}
+.foot{color:var(--muted);font-size:.78rem;text-align:center;margin:6px 0 0}
+</style>
+</head><body>
+
+<div class="app" id="app">
+  <div class="bar">
+    <h1 class="brand">BEHOLD<small>4 pictures · 1 name of Christ</small></h1>
+    <div class="row" style="gap:8px">
+      <span class="pill" aria-label="Coins"><span class="coin" aria-hidden="true"></span><span id="coins">0</span></span>
+      <button class="iconbtn" id="mapBtn" type="button">Levels</button>
+    </div>
+  </div>
+
+  <section id="play" aria-label="Puzzle">
+    <div class="lvl" id="lvlLabel">Level 1</div>
+    <div class="window" style="margin-top:8px"><div class="panes" id="panes"></div></div>
+    <div class="slots" id="slots" style="margin-top:16px" aria-label="Your answer"></div>
+    <p class="msg" id="msg" role="status" style="margin-top:8px">Tap letters to spell the word all four pictures share.</p>
+    <div class="tray" id="tray" style="margin-top:10px" aria-label="Letters"></div>
+    <div class="tools" style="margin-top:14px">
+      <button class="tool" id="hintBtn" type="button">Reveal a letter <span class="cost"><span class="coin" aria-hidden="true"></span>20</span></button>
+      <button class="tool" id="clearBtn" type="button">Clear</button>
+    </div>
+  </section>
+
+  <section id="levels" aria-label="Levels" hidden>
+    <div class="lvl">Choose a level</div>
+    <div class="map" id="map"></div>
+    <div class="row" style="margin-top:16px"><button class="btn ghost" id="backBtn" type="button">Back to puzzle</button><button class="btn ghost" id="resetBtn" type="button">Reset progress</button></div>
+    <p class="msg" id="resetMsg"></p>
+  </section>
+
+  <p class="foot">Scripture quotations from the King James Version.</p>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="revWord">
+    <div class="k">You found it</div>
+    <h2 id="revWord"></h2>
+    <blockquote id="revVerse"></blockquote>
+    <cite id="revRef"></cite>
+    <p id="revNote"></p>
+    <div class="earn" id="revEarn"></div>
+    <div class="row"><button class="btn" id="nextBtn" type="button">Next level</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+/* ================= PICTURES (original drawings, viewBox 0 0 100 100) ================= */
+const leaf=(x,y,r,f)=>`<path transform="translate(${x} ${y}) rotate(${r})" d="M0 0 C6 -9 18 -9 22 0 C14 6 6 6 0 0Z" fill="${f}"/>`;
+const ART={
+lamb:`<g fill="#4A4038"><rect x="40" y="70" width="5" height="16" rx="2"/><rect x="50" y="72" width="5" height="15" rx="2"/><rect x="62" y="70" width="5" height="16" rx="2"/><rect x="71" y="68" width="5" height="16" rx="2"/></g>
+<g fill="#FFFFFF" stroke="#D9D4C7" stroke-width="1.5"><circle cx="44" cy="52" r="13"/><circle cx="58" cy="47" r="14"/><circle cx="72" cy="54" r="12"/><circle cx="50" cy="63" r="12"/><circle cx="65" cy="65" r="11"/><circle cx="78" cy="62" r="8"/></g>
+<g fill="#FFFFFF"><circle cx="44" cy="52" r="11"/><circle cx="58" cy="47" r="12"/><circle cx="72" cy="54" r="10"/><circle cx="50" cy="63" r="10"/><circle cx="65" cy="65" r="9"/><circle cx="58" cy="57" r="12"/></g>
+<ellipse cx="24" cy="38" rx="7" ry="3.5" fill="#D9C2A4" transform="rotate(-25 24 38)"/>
+<ellipse cx="30" cy="48" rx="10" ry="12.5" fill="#EADCC8"/><ellipse cx="44" cy="40" rx="6" ry="3" fill="#D9C2A4" transform="rotate(25 44 40)"/>
+<circle cx="27" cy="46" r="2" fill="#2B2B2B"/><ellipse cx="25" cy="56" rx="3" ry="2" fill="#C9A88A"/>`,
+cross:`<path d="M10 92 Q50 74 90 92 L90 100 L10 100Z" fill="#5E8C3A"/><rect x="44" y="12" width="12" height="74" rx="2" fill="#8B5A2B"/><rect x="24" y="28" width="52" height="11" rx="2" fill="#8B5A2B"/><rect x="46" y="12" width="3" height="74" fill="#A9733F"/><rect x="24" y="30" width="52" height="3" fill="#A9733F"/>`,
+altar:`<path d="M50 14 C64 30 68 42 60 54 L40 54 C32 42 36 30 50 14Z" fill="#F97316"/><path d="M50 28 C57 38 58 46 54 54 L46 54 C42 46 43 38 50 28Z" fill="#FDE047"/>
+<rect x="28" y="52" width="44" height="6" rx="2" fill="#7C4A21"/><rect x="22" y="58" width="56" height="30" rx="3" fill="#9CA3AF"/>
+<g stroke="#6B7280" stroke-width="2"><path d="M22 68 H78"/><path d="M22 78 H78"/><path d="M40 58 V68"/><path d="M60 58 V68"/><path d="M32 68 V78"/><path d="M50 68 V78"/><path d="M68 68 V78"/><path d="M42 78 V88"/><path d="M60 78 V88"/></g>`,
+drop:`<path d="M50 12 C64 36 74 50 74 63 A24 24 0 0 1 26 63 C26 50 36 36 50 12Z" fill="#B91C1C"/><ellipse cx="40" cy="62" rx="5" ry="9" fill="#F87171" opacity=".7"/>`,
+bread:`<path d="M16 64 C16 38 84 38 84 64 L84 74 Q84 80 78 80 L22 80 Q16 80 16 74Z" fill="#C98532"/><path d="M16 64 C16 40 84 40 84 64 Q50 70 16 64Z" fill="#E8AD5A"/>
+<g stroke="#B5762A" stroke-width="3.5" stroke-linecap="round"><path d="M32 50 L38 60"/><path d="M47 46 L53 58"/><path d="M62 48 L68 58"/></g>`,
+wheat:`<path d="M50 92 L50 22" stroke="#B88A2E" stroke-width="3" stroke-linecap="round"/>
+<g fill="#E0B44A">${[26,36,46,56].map(y=>`<ellipse cx="43" cy="${y}" rx="5" ry="9" transform="rotate(-28 43 ${y})"/><ellipse cx="57" cy="${y}" rx="5" ry="9" transform="rotate(28 57 ${y})"/>`).join('')}<ellipse cx="50" cy="17" rx="5" ry="9"/></g>
+<path d="M50 70 C40 66 36 74 32 80" stroke="#8DA34A" stroke-width="3" fill="none"/><path d="M50 76 C60 72 64 80 68 86" stroke="#8DA34A" stroke-width="3" fill="none"/>`,
+basket:`<path d="M26 50 C26 18 74 18 74 50" fill="none" stroke="#7C4A03" stroke-width="5"/><ellipse cx="40" cy="48" rx="11" ry="7" fill="#E8AD5A"/><ellipse cx="59" cy="47" rx="12" ry="7" fill="#C98532"/>
+<path d="M18 50 L82 50 L73 86 L27 86Z" fill="#A16207"/><g stroke="#7C4A03" stroke-width="2.5"><path d="M21 62 L79 62"/><path d="M24 74 L76 74"/><path d="M38 50 L40 86"/><path d="M50 50 L50 86"/><path d="M62 50 L60 86"/></g>`,
+table:`<path d="M40 22 L56 22 L53 38 L43 38Z" fill="#CA8A04"/><rect x="46" y="38" width="4" height="6" fill="#CA8A04"/><ellipse cx="48" cy="44" rx="7" ry="2" fill="#A16207"/>
+<ellipse cx="70" cy="43" rx="11" ry="3" fill="#E5E7EB"/><ellipse cx="70" cy="39" rx="8" ry="4.5" fill="#D9963F"/><ellipse cx="28" cy="42" rx="7" ry="4" fill="#E8AD5A"/>
+<rect x="10" y="45" width="80" height="9" rx="2" fill="#8B5A2B"/><rect x="16" y="54" width="7" height="34" fill="#6B4220"/><rect x="77" y="54" width="7" height="34" fill="#6B4220"/>`,
+lamp:`<circle cx="84" cy="40" r="14" fill="#FDE68A" opacity=".55"/><path d="M84 52 C90 44 88 34 83 28 C80 36 78 44 84 52Z" fill="#FBBF24"/>
+<path d="M14 62 Q48 86 80 60 Q70 52 48 52 Q26 52 14 62Z" fill="#C2803A"/><path d="M74 58 L90 52 L86 61Z" fill="#C2803A"/><ellipse cx="46" cy="56" rx="10" ry="3" fill="#7C4A21"/>
+<path d="M18 60 C6 54 6 68 16 68" fill="none" stroke="#9A5F25" stroke-width="4"/>`,
+sun:`<g stroke="#F59E0B" stroke-width="5" stroke-linecap="round"><path d="M76 50 L88 50"/><path d="M68.4 68.4 L76.9 76.9"/><path d="M50 76 L50 88"/><path d="M31.6 68.4 L23.1 76.9"/><path d="M24 50 L12 50"/><path d="M31.6 31.6 L23.1 23.1"/><path d="M50 24 L50 12"/><path d="M68.4 31.6 L76.9 23.1"/></g><circle cx="50" cy="50" r="18" fill="#FBBF24"/>`,
+candle:`<circle cx="50" cy="26" r="17" fill="#FDE68A" opacity=".5"/><path d="M50 10 C58 20 58 29 50 33 C42 29 42 20 50 10Z" fill="#F59E0B"/><path d="M50 19 C54 24 54 29 50 31 C46 29 46 24 50 19Z" fill="#FEF3C7"/>
+<rect x="49" y="32" width="2" height="8" fill="#333"/><rect x="40" y="40" width="20" height="44" rx="3" fill="#FFFDF5"/><path d="M40 46 Q44 52 44 58 L40 58Z" fill="#EDE6D3"/><rect x="28" y="84" width="44" height="7" rx="3.5" fill="#B45309"/>`,
+star:`<polygon points="50,12 59,37 85,38 64,55 72,80 50,65 28,80 36,55 15,38 41,37" fill="#FCD34D" stroke="#E0A20F" stroke-width="2" stroke-linejoin="round"/><circle cx="18" cy="18" r="2.5" fill="#FFF7CC"/><circle cx="84" cy="80" r="2" fill="#FFF7CC"/><circle cx="86" cy="16" r="1.8" fill="#FFF7CC"/>`,
+staff:`<path d="M42 94 L42 36 C42 12 74 12 74 32 C74 42 64 44 60 36" fill="none" stroke="#8B5A2B" stroke-width="7" stroke-linecap="round"/><path d="M44 94 L44 38" stroke="#A9733F" stroke-width="2"/>`,
+hills:`<circle cx="74" cy="28" r="10" fill="#FCD34D"/><path d="M0 70 Q25 40 50 62 Q72 38 100 60 L100 100 L0 100Z" fill="#65A30D"/><path d="M0 84 Q35 64 70 80 Q86 72 100 78 L100 100 L0 100Z" fill="#4D7C0F"/>`,
+waves:`<g fill="none" stroke-linecap="round" stroke-width="6"><path d="M8 36 Q20 26 32 36 T56 36 T80 36 T92 34" stroke="#38BDF8"/><path d="M8 54 Q20 44 32 54 T56 54 T80 54 T92 52" stroke="#0EA5E9"/><path d="M8 72 Q20 62 32 72 T56 72 T80 72 T92 70" stroke="#0369A1"/></g>`,
+grapes:`<path d="M50 30 L53 14" stroke="#6B4220" stroke-width="4" stroke-linecap="round"/><path d="M53 22 C66 10 84 16 82 26 C72 31 61 29 53 22Z" fill="#4D7C0F"/>
+<g fill="#7C3AED">${[[42,38],[58,38],[34,52],[50,52],[66,52],[42,66],[58,66],[50,80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="9"/>`).join('')}</g><g fill="#C4B5FD" opacity=".7">${[[39,35],[55,35],[31,49],[47,49],[63,49],[39,63],[55,63],[47,77]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.5"/>`).join('')}</g>`,
+vine:`<path d="M8 84 C34 72 50 52 92 28" fill="none" stroke="#6B4220" stroke-width="6" stroke-linecap="round"/><path d="M60 46 C66 38 74 42 70 48 C66 52 62 48 66 44" fill="none" stroke="#6B8E23" stroke-width="2"/>
+${leaf(28,74,-70,'#65A30D')}${leaf(44,62,15,'#4D7C0F')}${leaf(58,52,-80,'#65A30D')}${leaf(76,38,5,'#4D7C0F')}
+<g fill="#7C3AED"><circle cx="40" cy="74" r="5"/><circle cx="47" cy="78" r="5"/><circle cx="42" cy="83" r="5"/><circle cx="49" cy="87" r="4.5"/></g>`,
+cup:`<path d="M28 20 L72 20 Q72 52 50 56 Q28 52 28 20Z" fill="#D4A017"/><ellipse cx="50" cy="21" rx="22" ry="4.5" fill="#7F1D1D"/><path d="M34 26 Q36 44 48 50" stroke="#F5D06A" stroke-width="3" fill="none"/>
+<rect x="47" y="55" width="6" height="22" fill="#B8860B"/><ellipse cx="50" cy="82" rx="19" ry="5.5" fill="#B8860B"/><circle cx="50" cy="64" r="4" fill="#D4A017"/>`,
+door:`<rect x="24" y="10" width="52" height="84" rx="3" fill="#5B3A1E"/><rect x="30" y="16" width="40" height="78" rx="2" fill="#A0522D"/><rect x="35" y="22" width="30" height="28" rx="2" fill="#8B4513"/><rect x="35" y="56" width="30" height="32" rx="2" fill="#8B4513"/><circle cx="63" cy="53" r="3.5" fill="#FCD34D"/>`,
+key:`<circle cx="28" cy="50" r="14" fill="none" stroke="#EAB308" stroke-width="7"/><rect x="40" y="46" width="48" height="8" rx="2" fill="#EAB308"/><rect x="76" y="54" width="7" height="13" fill="#EAB308"/><rect x="64" y="54" width="6" height="9" fill="#EAB308"/><circle cx="28" cy="50" r="5" fill="none" stroke="#FDE68A" stroke-width="2"/>`,
+gate:`<g fill="#8B5A2B"><rect x="12" y="26" width="9" height="66" rx="2"/><rect x="79" y="26" width="9" height="66" rx="2"/></g><g fill="#B07A45"><rect x="21" y="38" width="58" height="7"/><rect x="21" y="66" width="58" height="7"/><rect x="34" y="34" width="5" height="44"/><rect x="61" y="34" width="5" height="44"/></g><path d="M23 70 L77 41" stroke="#B07A45" stroke-width="7"/>`,
+rock:`<path d="M8 86 L20 50 L40 34 L64 38 L82 54 L92 86Z" fill="#78716C"/><path d="M40 34 L48 62 L20 50Z" fill="#A8A29E"/><path d="M48 62 L64 38 L82 54Z" fill="#57534E"/><path d="M48 62 L92 86 L8 86 L20 50Z" fill="#6B6560"/><rect x="0" y="86" width="100" height="14" fill="#65A30D"/>`,
+house:`<path d="M10 86 L90 86 L82 96 L18 96Z" fill="#78716C"/><rect x="24" y="44" width="52" height="42" fill="#E7C9A0"/><path d="M16 46 L50 18 L84 46Z" fill="#B45309"/><rect x="44" y="62" width="13" height="24" fill="#7C4A21"/><rect x="29" y="54" width="10" height="10" fill="#7DD3FC"/><rect x="62" y="54" width="10" height="10" fill="#7DD3FC"/>`,
+mountain:`<path d="M4 88 L38 28 L56 58 L68 40 L96 88Z" fill="#64748B"/><path d="M38 28 L29 44 L36 41 L41 46 L46 41Z" fill="#F1F5F9"/><path d="M68 40 L62 50 L68 47 L74 51Z" fill="#F1F5F9"/><path d="M38 28 L56 58 L44 88 L4 88Z" fill="#7C8BA1" opacity=".5"/>`,
+crown:`<path d="M16 70 L20 30 L36 50 L50 24 L64 50 L80 30 L84 70Z" fill="#FACC15"/><rect x="16" y="66" width="68" height="14" rx="2" fill="#EAB308"/>
+<circle cx="20" cy="28" r="4" fill="#FACC15"/><circle cx="50" cy="22" r="4" fill="#FACC15"/><circle cx="80" cy="28" r="4" fill="#FACC15"/><circle cx="33" cy="73" r="3.5" fill="#DC2626"/><circle cx="50" cy="73" r="3.5" fill="#2563EB"/><circle cx="67" cy="73" r="3.5" fill="#16A34A"/>`,
+throne:`<rect x="28" y="16" width="44" height="44" rx="5" fill="#7E22CE"/><rect x="24" y="10" width="52" height="9" rx="4" fill="#EAB308"/><circle cx="50" cy="34" r="6" fill="#EAB308"/>
+<rect x="16" y="44" width="11" height="16" rx="2" fill="#CA8A04"/><rect x="73" y="44" width="11" height="16" rx="2" fill="#CA8A04"/><rect x="18" y="56" width="64" height="11" rx="2" fill="#EAB308"/><rect x="24" y="67" width="7" height="24" fill="#CA8A04"/><rect x="69" y="67" width="7" height="24" fill="#CA8A04"/>`,
+sceptre:`<path d="M28 90 L64 28" stroke="#CA8A04" stroke-width="7" stroke-linecap="round"/><circle cx="47" cy="57" r="5" fill="#FACC15"/><circle cx="67" cy="22" r="11" fill="#FACC15"/><circle cx="67" cy="22" r="4.5" fill="#DC2626"/><path d="M67 8 L67 4 M63 6 L71 6" stroke="#FACC15" stroke-width="3"/>`,
+lion:`<g fill="#B45309">${Array.from({length:14},(_,i)=>{const a=i/14*Math.PI*2;return `<circle cx="${(50+30*Math.cos(a)).toFixed(1)}" cy="${(52+30*Math.sin(a)).toFixed(1)}" r="10"/>`}).join('')}<circle cx="50" cy="52" r="30"/></g>
+<circle cx="35" cy="36" r="6" fill="#F59E0B"/><circle cx="65" cy="36" r="6" fill="#F59E0B"/><circle cx="50" cy="55" r="21" fill="#F59E0B"/><ellipse cx="50" cy="65" rx="10" ry="7" fill="#FCD34D"/>
+<circle cx="42" cy="50" r="2.6" fill="#1F2937"/><circle cx="58" cy="50" r="2.6" fill="#1F2937"/><path d="M45 59 L55 59 L50 65Z" fill="#7C2D12"/><path d="M50 65 Q46 71 42 68 M50 65 Q54 71 58 68" fill="none" stroke="#7C2D12" stroke-width="2"/>`,
+nails:`${[[30,-18],[50,0],[70,18]].map(([x,r])=>`<g transform="translate(${x} 52) rotate(${r})" fill="#6B7280"><rect x="-3" y="-30" width="6" height="54"/><rect x="-10" y="-35" width="20" height="7" rx="2" fill="#4B5563"/><path d="M-3 24 L3 24 L0 34Z"/><rect x="-3" y="-28" width="2" height="50" fill="#9CA3AF"/></g>`).join('')}`,
+thorns:`<ellipse cx="50" cy="54" rx="35" ry="17" fill="none" stroke="#6B4220" stroke-width="7"/><ellipse cx="50" cy="52" rx="33" ry="14" fill="none" stroke="#8B5A2B" stroke-width="3" transform="rotate(-6 50 52)"/>
+<g fill="#5A3519"><path d="M20 47 L13 39 L25 42Z"/><path d="M34 40 L31 29 L40 37Z"/><path d="M52 37 L52 26 L58 37Z"/><path d="M68 39 L73 29 L74 41Z"/><path d="M81 47 L89 40 L83 51Z"/><path d="M28 67 L21 75 L33 70Z"/><path d="M50 71 L50 82 L56 71Z"/><path d="M71 67 L79 74 L67 70Z"/></g>`,
+tomb:`<path d="M0 90 L0 44 Q50 8 100 44 L100 90Z" fill="#A8A29E"/><path d="M26 90 L26 60 Q40 42 54 60 L54 90Z" fill="#292524"/><circle cx="76" cy="72" r="17" fill="#78716C"/><circle cx="76" cy="72" r="17" fill="none" stroke="#57534E" stroke-width="3"/><rect x="0" y="88" width="100" height="12" fill="#65A30D"/>`,
+stone:`<rect x="0" y="84" width="100" height="16" fill="#A3A08F"/><circle cx="50" cy="54" r="32" fill="#78716C"/><circle cx="50" cy="54" r="32" fill="none" stroke="#57534E" stroke-width="3"/><path d="M28 44 Q42 34 56 40" stroke="#A8A29E" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="62" cy="66" r="4" fill="#5F5953"/>`,
+sunrise:`<g stroke="#FB923C" stroke-width="4" stroke-linecap="round"><path d="M24 70 L12 70"/><path d="M27.5 57 L17.1 51"/><path d="M37 47.5 L31 37.1"/><path d="M50 44 L50 32"/><path d="M63 47.5 L69 37.1"/><path d="M72.5 57 L82.9 51"/><path d="M76 70 L88 70"/></g><circle cx="50" cy="70" r="20" fill="#F97316"/><rect x="0" y="70" width="100" height="30" fill="#4D7C0F"/><path d="M0 78 Q50 70 100 80 L100 100 L0 100Z" fill="#3F6212"/>`,
+linen:`<path d="M16 66 L50 52 L86 62 L52 78Z" fill="#FAFAF9"/><path d="M16 66 L52 78 L52 86 L16 74Z" fill="#E7E5E4"/><path d="M52 78 L86 62 L86 70 L52 86Z" fill="#D6D3D1"/><g stroke="#D6D3D1" stroke-width="2"><path d="M24 64 L56 54"/><path d="M32 68 L64 57"/><path d="M40 71 L72 60"/></g><path d="M20 40 Q50 30 80 40" stroke="#FDE68A" stroke-width="3" fill="none" opacity=".8"/>`,
+well:`<path d="M18 22 L50 8 L82 22Z" fill="#B45309"/><rect x="25" y="20" width="5" height="32" fill="#7C4A21"/><rect x="70" y="20" width="5" height="32" fill="#7C4A21"/><path d="M50 22 L50 34" stroke="#78350F" stroke-width="2"/><rect x="45" y="34" width="10" height="9" fill="#7C4A21"/>
+<rect x="24" y="50" width="52" height="38" fill="#A8A29E"/><ellipse cx="50" cy="50" rx="26" ry="7" fill="#57534E"/><ellipse cx="50" cy="50" rx="20" ry="4.5" fill="#0EA5E9"/><g stroke="#78716C" stroke-width="2"><path d="M24 64 H76"/><path d="M24 76 H76"/><path d="M38 57 V64"/><path d="M62 57 V64"/><path d="M50 64 V76"/><path d="M36 76 V88"/><path d="M64 76 V88"/></g>`,
+jar:`<rect x="33" y="16" width="34" height="7" rx="2" fill="#9A3412"/><path d="M37 22 L63 22 L61 30 Q78 40 74 62 Q70 84 50 86 Q30 84 26 62 Q22 40 39 30Z" fill="#C2410C"/><path d="M27 52 Q50 59 73 52" stroke="#FDBA74" stroke-width="3" fill="none"/><path d="M34 40 Q30 56 36 70" stroke="#E46A33" stroke-width="3" fill="none"/>`,
+river:`<path d="M0 24 Q30 14 50 34 T100 44 L100 66 Q70 56 50 74 T0 64Z" fill="#38BDF8"/><path d="M14 40 Q24 36 32 42 M54 52 Q64 48 72 54" stroke="#E0F2FE" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M0 84 Q20 76 40 86 L40 100 L0 100Z" fill="#65A30D"/><path d="M70 14 Q86 6 100 12 L100 0 L64 0Z" fill="#65A30D"/>`,
+tree:`<rect x="44" y="56" width="12" height="34" fill="#7C4A21"/><circle cx="34" cy="46" r="18" fill="#15803D"/><circle cx="66" cy="46" r="18" fill="#15803D"/><circle cx="50" cy="30" r="21" fill="#16A34A"/><g fill="#DC2626"><circle cx="38" cy="38" r="3"/><circle cx="60" cy="26" r="3"/><circle cx="68" cy="50" r="3"/><circle cx="46" cy="52" r="3"/></g><rect x="0" y="88" width="100" height="12" fill="#65A30D"/>`,
+heart:`<path d="M50 86 C18 64 10 44 21 30 C32 18 46 22 50 35 C54 22 68 18 79 30 C90 44 82 64 50 86Z" fill="#E11D48"/><path d="M30 34 C26 40 27 48 32 54" stroke="#FDA4AF" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+seed:`<ellipse cx="50" cy="82" rx="36" ry="11" fill="#78350F"/><path d="M50 80 L50 44" stroke="#16A34A" stroke-width="4" stroke-linecap="round"/><path d="M50 52 C36 50 28 38 30 30 C44 32 50 42 50 52Z" fill="#22C55E"/><path d="M50 60 C64 58 72 46 70 38 C56 40 50 50 50 60Z" fill="#22C55E"/><ellipse cx="50" cy="82" rx="6" ry="3.5" fill="#FCD34D"/>`,
+camel:`<g fill="#B5835A"><rect x="26" y="58" width="5" height="28" rx="1"/><rect x="35" y="58" width="5" height="28" rx="1"/><rect x="58" y="58" width="5" height="28" rx="1"/><rect x="67" y="58" width="5" height="28" rx="1"/></g>
+<path d="M20 60 Q20 42 34 46 Q40 28 50 44 Q56 30 64 44 Q72 42 74 52 L74 62 L20 62Z" fill="#D4A373"/><path d="M68 54 Q80 42 79 26 L88 23 Q93 25 91 30 L86 32 Q87 48 76 62Z" fill="#D4A373"/><circle cx="86" cy="27" r="1.6" fill="#333"/><path d="M20 56 Q12 60 14 70" stroke="#B5835A" stroke-width="3" fill="none"/>
+<path d="M36 46 Q50 40 62 46 L60 52 L38 52Z" fill="#B91C1C"/>`,
+gift:`<path d="M50 36 C36 18 24 30 50 36 C76 30 64 18 50 36Z" fill="#FACC15"/><rect x="24" y="44" width="52" height="42" rx="3" fill="#DC2626"/><rect x="20" y="35" width="60" height="12" rx="3" fill="#EF4444"/><rect x="46" y="35" width="8" height="51" fill="#FACC15"/>`,
+dove:`<path d="M40 50 Q48 16 78 20 Q66 36 60 52Z" fill="#E2E8F0"/><path d="M16 58 Q34 42 60 48 Q72 42 80 44 L88 42 L82 52 Q76 64 56 66 Q36 70 16 58Z" fill="#FFFFFF"/><path d="M16 58 L6 52 L10 62Z" fill="#E2E8F0"/><circle cx="77" cy="46" r="1.8" fill="#1F2937"/><path d="M86 43 L95 44 L87 48Z" fill="#F59E0B"/><path d="M44 52 Q50 32 70 26" stroke="#CBD5E1" stroke-width="2" fill="none"/>`,
+olive:`<path d="M14 84 Q46 58 88 20" fill="none" stroke="#6B4220" stroke-width="4" stroke-linecap="round"/>${leaf(26,74,-80,'#65A30D')}${leaf(36,66,10,'#4D7C0F')}${leaf(50,56,-85,'#65A30D')}${leaf(60,46,5,'#4D7C0F')}${leaf(74,34,-75,'#65A30D')}<g fill="#3F6212"><ellipse cx="44" cy="70" rx="4" ry="5.5"/><ellipse cx="68" cy="50" rx="4" ry="5.5"/></g>`,
+cloud:`<g fill="#FFFFFF"><circle cx="34" cy="56" r="16"/><circle cx="52" cy="45" r="21"/><circle cx="70" cy="56" r="15"/><rect x="30" y="56" width="42" height="16" rx="8"/></g><path d="M22 72 L80 72" stroke="#E2E8F0" stroke-width="3" stroke-linecap="round"/><g stroke="#93C5FD" stroke-width="3" stroke-linecap="round"><path d="M40 80 L37 88"/><path d="M54 80 L51 88"/><path d="M68 80 L65 88"/></g>`,
+fish:`<path d="M70 50 L90 34 L85 50 L90 66Z" fill="#2563EB"/><path d="M14 50 Q42 22 72 50 Q42 78 14 50Z" fill="#60A5FA"/><circle cx="27" cy="47" r="3.2" fill="#1E3A8A"/><g stroke="#2563EB" stroke-width="2" fill="none"><path d="M42 40 Q48 50 42 60"/><path d="M52 40 Q58 50 52 60"/></g>`,
+boat:`<rect x="48" y="16" width="4" height="44" fill="#78350F"/><path d="M53 18 L53 56 L80 56Z" fill="#F5F5F4"/><path d="M47 24 L47 56 L28 56Z" fill="#E7E5E4"/><path d="M10 60 L90 60 L77 80 L23 80Z" fill="#92400E"/><path d="M14 64 L86 64" stroke="#B45309" stroke-width="3"/><path d="M0 84 Q12 78 25 84 T50 84 T75 84 T100 84 L100 100 L0 100Z" fill="#38BDF8"/>`,
+net:`<g stroke="#A16207" stroke-width="2.5" fill="none" stroke-linecap="round">${[18,30,42,54,66,78].map(x=>`<path d="M${x} 20 Q${x+4} 52 ${x} 84"/>`).join('')}${[20,32,44,56,68,80].map(y=>`<path d="M18 ${y} Q48 ${y+5} 82 ${y}"/>`).join('')}</g><g fill="#F59E0B"><circle cx="18" cy="18" r="4.5"/><circle cx="42" cy="18" r="4.5"/><circle cx="66" cy="18" r="4.5"/></g><path d="M36 64 Q46 56 56 64 Q46 72 36 64Z" fill="#60A5FA"/><path d="M56 64 L62 59 L62 69Z" fill="#60A5FA"/>`,
+scroll:`<rect x="24" y="22" width="52" height="56" fill="#F3E3C3"/><rect x="18" y="14" width="64" height="12" rx="6" fill="#C9A77A"/><rect x="18" y="74" width="64" height="12" rx="6" fill="#C9A77A"/><g stroke="#8B6B3E" stroke-width="2.5" stroke-linecap="round"><path d="M32 36 L68 36"/><path d="M32 46 L64 46"/><path d="M32 56 L68 56"/><path d="M32 66 L56 66"/></g>`,
+book:`<path d="M8 30 L8 84 Q30 78 50 86 Q70 78 92 84 L92 30" fill="#7F1D1D"/><path d="M50 30 Q34 22 13 26 L13 78 Q34 74 50 82Z" fill="#FFFFFF"/><path d="M50 30 Q66 22 87 26 L87 78 Q66 74 50 82Z" fill="#F1F5F9"/><g stroke="#94A3B8" stroke-width="2" stroke-linecap="round"><path d="M20 38 L42 36"/><path d="M20 46 L42 44"/><path d="M20 54 L42 52"/><path d="M58 36 L80 38"/><path d="M58 44 L80 46"/><path d="M58 52 L80 54"/></g><path d="M66 60 L66 72 M61 64 L71 64" stroke="#B91C1C" stroke-width="3"/>`,
+hands:`<path d="M50 16 Q42 17 39 34 L33 66 Q31 77 42 80 L50 82Z" fill="#C68642"/><path d="M50 16 Q58 17 61 34 L67 66 Q69 77 58 80 L50 82Z" fill="#B0703A"/>
+<g stroke="#8D5524" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M50 18 L50 80"/><path d="M45 20 Q42 30 42 42"/><path d="M41 28 Q38 36 38 46"/><path d="M55 20 Q58 30 58 42"/><path d="M59 28 Q62 36 62 46"/></g>
+<path d="M42 50 Q36 52 37 62 Q42 60 46 54Z" fill="#D9985A" stroke="#8D5524" stroke-width="1.4"/><path d="M58 50 Q64 52 63 62 Q58 60 54 54Z" fill="#C07D44" stroke="#8D5524" stroke-width="1.4"/><rect x="35" y="80" width="30" height="13" rx="3" fill="#2563EB"/><path d="M50 8 L50 13 M42 11 L45 15 M58 11 L55 15" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round"/>`,
+speech:`<path d="M16 22 H84 Q90 22 90 28 V62 Q90 68 84 68 H42 L24 84 L29 68 H16 Q10 68 10 62 V28 Q10 22 16 22Z" fill="#FFFFFF"/><g fill="#16275A"><circle cx="34" cy="45" r="5"/><circle cx="50" cy="45" r="5"/><circle cx="66" cy="45" r="5"/></g>`,
+rings:`<circle cx="40" cy="56" r="18" fill="none" stroke="#EAB308" stroke-width="7"/><circle cx="60" cy="56" r="18" fill="none" stroke="#FACC15" stroke-width="7"/><path d="M34 34 L40 27 L46 34 L40 41Z" fill="#7DD3FC"/><path d="M40 27 L40 41" stroke="#BAE6FD" stroke-width="1.5"/>`,
+eye:`<path d="M8 50 Q50 12 92 50 Q50 88 8 50Z" fill="#FFFFFF"/><circle cx="50" cy="50" r="17" fill="#2563EB"/><circle cx="50" cy="50" r="7.5" fill="#0F172A"/><circle cx="56" cy="44" r="3.5" fill="#FFFFFF"/><path d="M8 50 Q50 12 92 50" fill="none" stroke="#334155" stroke-width="3"/><g stroke="#FCD34D" stroke-width="3" stroke-linecap="round"><path d="M50 18 L50 10"/><path d="M30 24 L25 17"/><path d="M70 24 L75 17"/></g>`
+};
+const svg=k=>`<svg viewBox="0 0 100 100" role="img" aria-label="${k}" xmlns="http://www.w3.org/2000/svg">${ART[k]}</svg>`;
+
+/* ================= LEVELS ================= */
+const LEVELS=[
+{a:'LAMB',p:['lamb','altar','cross','drop'],v:'Behold the Lamb of God, which taketh away the sin of the world.',r:'John 1:29',n:'Every lamb offered on an altar in the Old Testament pointed to Jesus, the final sacrifice.'},
+{a:'BREAD',p:['bread','wheat','basket','table'],v:'I am the bread of life: he that cometh to me shall never hunger.',r:'John 6:35',n:'Jesus fed 5,000 with five loaves, then told them He Himself is the bread that satisfies.'},
+{a:'LIGHT',p:['lamp','sun','candle','star'],v:'I am the light of the world: he that followeth me shall not walk in darkness.',r:'John 8:12',n:'Wherever Jesus goes, darkness has to leave.'},
+{a:'SHEPHERD',p:['lamb','staff','hills','waves'],v:'I am the good shepherd: the good shepherd giveth his life for the sheep.',r:'John 10:11',n:'Psalm 23 sang of a shepherd by still waters. Jesus is that Shepherd, and He laid down His life for us.'},
+{a:'VINE',p:['grapes','vine','cup','tree'],v:'I am the vine, ye are the branches.',r:'John 15:5',n:'A branch lives only while it stays joined to the vine. So do we in Christ.'},
+{a:'DOOR',p:['door','key','gate','lamb'],v:'I am the door: by me if any man enter in, he shall be saved.',r:'John 10:9',n:'A shepherd slept across the gate of the sheepfold. Jesus is the only way in.'},
+{a:'ROCK',p:['rock','house','mountain','waves'],v:'And did all drink the same spiritual drink: for they drank of that spiritual Rock that followed them: and that Rock was Christ.',r:'1 Corinthians 10:4',n:'The house built on the rock stood through the storm. Build on Christ.'},
+{a:'KING',p:['crown','throne','sceptre','lion'],v:'And he hath on his vesture and on his thigh a name written, KING OF KINGS, AND LORD OF LORDS.',r:'Revelation 19:16',n:'He came first as a servant. He returns as King.'},
+{a:'CROSS',p:['cross','nails','thorns','hills'],v:'For the preaching of the cross is to them that perish foolishness; but unto us which are saved it is the power of God.',r:'1 Corinthians 1:18',n:'The crown of thorns, the nails and the hill of Calvary: the price of our freedom.'},
+{a:'RISEN',p:['tomb','stone','sunrise','linen'],v:'He is not here, but is risen.',r:'Luke 24:6',n:'The stone rolled away and the grave clothes lay folded. The tomb is empty.'},
+{a:'WATER',p:['well','jar','river','waves'],v:'But whosoever drinketh of the water that I shall give him shall never thirst.',r:'John 4:14',n:'At a well in Samaria, Jesus offered a thirsty woman living water.'},
+{a:'LIFE',p:['tree','heart','seed','sunrise'],v:'I am the way, the truth, and the life: no man cometh unto the Father, but by me.',r:'John 14:6',n:'He is not only the giver of life. He is life itself.'},
+{a:'GIFT',p:['star','camel','gift','heart'],v:'For God so loved the world, that he gave his only begotten Son.',r:'John 3:16',n:'Wise men brought gifts to Jesus, but Jesus is God\'s gift to the world.'},
+{a:'DOVE',p:['dove','river','cloud','olive'],v:'And Jesus, when he was baptized, went up straightway out of the water: and, lo, the heavens were opened unto him, and he saw the Spirit of God descending like a dove.',r:'Matthew 3:16',n:'At the Jordan the Father spoke, the Spirit descended, and the Son was revealed.'},
+{a:'FISH',p:['fish','boat','net','bread'],v:'Follow me, and I will make you fishers of men.',r:'Matthew 4:19',n:'Early Christians drew a fish as a secret sign of their faith in Jesus.'},
+{a:'LION',p:['lion','crown','scroll','mountain'],v:'Behold, the Lion of the tribe of Juda, the Root of David, hath prevailed to open the book.',r:'Revelation 5:5',n:'The Lamb who was slain is also the Lion who conquers.'},
+{a:'LOVE',p:['heart','cross','hands','rings'],v:'Greater love hath no man than this, that a man lay down his life for his friends.',r:'John 15:13',n:'The cross is the clearest picture of love the world has ever seen.'},
+{a:'PEACE',p:['dove','olive','waves','hands'],v:'Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you.',r:'John 14:27',n:'He spoke "Peace, be still" and the storm obeyed. He still speaks peace to storms today.'},
+{a:'WORD',p:['scroll','book','speech','lamp'],v:'In the beginning was the Word, and the Word was with God, and the Word was God.',r:'John 1:1',n:'Scripture is a lamp to our feet, and every page points to the living Word, Jesus.'},
+{a:'WINE',p:['grapes','cup','jar','rings'],v:'This beginning of miracles did Jesus in Cana of Galilee, and manifested forth his glory.',r:'John 2:11',n:'At a wedding in Cana, water jars became the best wine. His first miracle.'},
+{a:'BLOOD',p:['drop','cup','cross','lamb'],v:'The blood of Jesus Christ his Son cleanseth us from all sin.',r:'1 John 1:7',n:'The Passover lamb\'s blood saved Israel. Christ\'s blood saves the world.'},
+{a:'HEAL',p:['eye','hands','heart','waves'],v:'He was wounded for our transgressions, he was bruised for our iniquities: the chastisement of our peace was upon him; and with his stripes we are healed.',r:'Isaiah 53:5',n:'The blind saw, the lame walked, and the broken-hearted were made whole.'},
+{a:'SAVIOUR',p:['star','cross','hands','heart'],v:'For unto you is born this day in the city of David a Saviour, which is Christ the Lord.',r:'Luke 2:11',n:'From the star over Bethlehem to the cross at Calvary, He came to save.'},
+{a:'WAY',p:['door','sunrise','key','book'],v:'Jesus saith unto him, I am the way, the truth, and the life.',r:'John 14:6',n:'Not a way among many. The way home to the Father.'}
+];
+
+/* ================= STATE ================= */
+const $=id=>document.getElementById(id);
+const save=(k,v)=>{try{localStorage.setItem('behold_'+k,JSON.stringify(v))}catch(e){}};
+const load=(k,d)=>{try{const v=localStorage.getItem('behold_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+let S={lvl:load('lvl',0),done:load('done',[]),coins:load('coins',60)};
+let cur=null; // {letters:[{ch,used}], slots:[{i,hint}] }
+function rng(seed){let s=seed*9301+49297;return()=>((s=(s*9301+49297)%233280)/233280)}
+const ABC='ABCDEFGHIJKLMNOPRSTUW';
+function build(i){
+  const L=LEVELS[i], r=rng(i+7), letters=L.a.split('');
+  while(letters.length<12){const c=ABC[Math.floor(r()*ABC.length)];letters.push(c)}
+  for(let k=letters.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[letters[k],letters[j]]=[letters[j],letters[k]]}
+  return {letters:letters.map(ch=>({ch,used:false})),slots:L.a.split('').map(()=>null),hints:[]};
+}
+
+/* ================= RENDER ================= */
+function coins(){$('coins').textContent=S.coins;$('hintBtn').disabled=S.coins<20}
+function render(){
+  const L=LEVELS[S.lvl];
+  $('lvlLabel').textContent=`Level ${S.lvl+1} of ${LEVELS.length}`;
+  $('panes').innerHTML=L.p.map(k=>`<div class="pane">${svg(k)}</div>`).join('');
+  drawSlots();drawTray();coins();
+}
+function drawSlots(){
+  const s=$('slots');s.className='slots';
+  s.innerHTML=cur.slots.map((x,i)=>{const h=cur.hints.includes(i);const ch=h?LEVELS[S.lvl].a[i]:(x!=null?cur.letters[x].ch:'');
+    return `<button type="button" class="slot${ch?' filled':''}${h?' hinted':''}" data-i="${i}" aria-label="Letter ${i+1}${ch?': '+ch:''}">${ch}</button>`}).join('');
+  s.querySelectorAll('.slot').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(cur.hints.includes(i))return;const x=cur.slots[i];if(x==null)return;cur.letters[x].used=false;cur.slots[i]=null;drawSlots();drawTray()});
+}
+function drawTray(){
+  $('tray').innerHTML=cur.letters.map((l,i)=>`<button type="button" class="tile${l.used?' used':''}" data-i="${i}" ${l.used?'tabindex="-1" aria-hidden="true"':''}>${l.ch}</button>`).join('');
+  $('tray').querySelectorAll('.tile').forEach(b=>b.onclick=()=>pick(+b.dataset.i));
+}
+function pick(i){
+  const l=cur.letters[i];if(l.used)return;
+  const slot=cur.slots.findIndex((x,k)=>x==null&&!cur.hints.includes(k));if(slot<0)return;
+  l.used=true;cur.slots[slot]=i;drawSlots();drawTray();check();
+}
+function guess(){return cur.slots.map((x,k)=>cur.hints.includes(k)?LEVELS[S.lvl].a[k]:(x!=null?cur.letters[x].ch:'')).join('')}
+function check(){
+  const g=guess(),A=LEVELS[S.lvl].a;
+  if(g.length<A.length||cur.slots.some((x,k)=>x==null&&!cur.hints.includes(k)))return;
+  if(g===A){$('slots').className='slots right';setTimeout(win,450)}
+  else{$('slots').className='slots wrong';$('msg').textContent='Not quite. Tap a letter in the answer to take it back.';}
+}
+function win(){
+  const L=LEVELS[S.lvl],first=!S.done.includes(S.lvl);
+  if(first){S.done.push(S.lvl);S.coins+=10;save('done',S.done);save('coins',S.coins)}
+  $('revWord').textContent=L.a;$('revVerse').textContent='“'+L.v+'”';$('revRef').textContent=L.r;$('revNote').textContent=L.n;
+  $('revEarn').innerHTML=first?'<span class="coin" aria-hidden="true"></span> +10 coins':'';
+  const last=S.lvl>=LEVELS.length-1;$('nextBtn').textContent=last?(S.done.length>=LEVELS.length?'See all levels':'Next unsolved level'):'Next level';
+  $('overlay').hidden=false;$('nextBtn').focus();coins();
+}
+function hint(){
+  if(S.coins<20){$('msg').textContent='You need 20 coins. Solve a level to earn 10.';return}
+  const A=LEVELS[S.lvl].a;
+  const open=A.split('').map((c,k)=>k).filter(k=>!cur.hints.includes(k)&&(cur.slots[k]==null||cur.letters[cur.slots[k]].ch!==A[k]));
+  if(!open.length)return;
+  const k=open[0];
+  if(cur.slots[k]!=null){cur.letters[cur.slots[k]].used=false;cur.slots[k]=null}
+  const t=cur.letters.findIndex(l=>!l.used&&l.ch===A[k]);
+  if(t<0){ // letter is sitting in a wrong slot; free it
+    const s=cur.slots.findIndex((x,j)=>x!=null&&cur.letters[x].ch===A[k]);cur.letters[cur.slots[s]].used=false;cur.slots[s]=null;
+  }
+  const t2=cur.letters.findIndex(l=>!l.used&&l.ch===A[k]);cur.letters[t2].used=true;cur.hints.push(k);cur.slots[k]=t2;
+  S.coins-=20;save('coins',S.coins);$('msg').textContent='Letter revealed.';drawSlots();drawTray();coins();check();
+}
+function go(i){S.lvl=i;save('lvl',i);cur=build(i);$('msg').textContent='Tap letters to spell the word all four pictures share.';render()}
+function showMap(on){
+  $('play').hidden=on;$('levels').hidden=!on;$('mapBtn').textContent=on?'Puzzle':'Levels';
+  if(!on)return;
+  const maxOpen=Math.max(S.lvl,...S.done.map(d=>d+1),0);
+  $('map').innerHTML=LEVELS.map((L,i)=>{const done=S.done.includes(i),locked=i>maxOpen&&!done;
+    return `<button type="button" class="mapbtn${done?' done':''}${locked?' locked':''}${i===S.lvl?' cur':''}" data-i="${i}" ${locked?'disabled aria-label="Level '+(i+1)+' locked"':''}>${i+1}${done?`<small>${L.a}</small>`:''}</button>`}).join('');
+  $('map').querySelectorAll('.mapbtn:not(.locked)').forEach(b=>b.onclick=()=>{go(+b.dataset.i);showMap(false)});
+}
+$('tray').addEventListener('keydown',()=>{});
+document.addEventListener('keydown',e=>{
+  if(!$('overlay').hidden){if(e.key==='Enter'){e.preventDefault();$('nextBtn').click()}return}
+  if($('play').hidden)return;
+  const k=e.key.toUpperCase();
+  if(e.key==='Backspace'){const idx=[...cur.slots.keys()].reverse().find(i=>cur.slots[i]!=null&&!cur.hints.includes(i));if(idx!=null){cur.letters[cur.slots[idx]].used=false;cur.slots[idx]=null;drawSlots();drawTray()}return}
+  if(/^[A-Z]$/.test(k)){const t=cur.letters.findIndex(l=>!l.used&&l.ch===k);if(t>=0)pick(t)}
+});
+$('hintBtn').onclick=hint;
+$('clearBtn').onclick=()=>{cur.slots.forEach((x,k)=>{if(x!=null&&!cur.hints.includes(k)){cur.letters[x].used=false;cur.slots[k]=null}});$('msg').textContent='Cleared.';drawSlots();drawTray()};
+$('nextBtn').onclick=()=>{$('overlay').hidden=true;
+  let n=LEVELS.findIndex((_,i)=>i>S.lvl&&!S.done.includes(i));if(n<0)n=LEVELS.findIndex((_,i)=>!S.done.includes(i));
+  if(n<0){showMap(true);return}go(n)};
+$('mapBtn').onclick=()=>showMap($('levels').hidden);
+$('backBtn').onclick=()=>showMap(false);
+let armed=false;
+$('resetBtn').onclick=()=>{if(!armed){armed=true;$('resetBtn').textContent='Tap again to reset';$('resetMsg').textContent='This clears your solved levels and coins.';return}
+  armed=false;S={lvl:0,done:[],coins:60};save('lvl',0);save('done',[]);save('coins',60);$('resetBtn').textContent='Reset progress';$('resetMsg').textContent='Progress reset.';go(0);showMap(true)};
+window.__BEHOLD={ART,LEVELS,svg};
+go(Math.min(S.lvl,LEVELS.length-1));
+})();
+</script>
+</body></html>
