@@ -21,7 +21,7 @@ html,body{min-height:100%}
 body{margin:0;background:radial-gradient(120% 70% at 50% 0%,var(--night-2),var(--night) 60%) var(--night);background-attachment:fixed;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
 button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.app{max-width:480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 28px;display:flex;flex-direction:column;gap:14px}
+.app{max-width:480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px}
 .brand{font-family:var(--display);font-weight:800;font-size:1.5rem;letter-spacing:.06em;color:var(--gold);margin:0;line-height:1;background:none;border:0;padding:0;text-align:left}
 .brand small{display:block;font-family:var(--body);font-weight:700;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
