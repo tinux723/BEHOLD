@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Behold</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0E1838"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Behold"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="description" content="Behold: Bible Picture Puzzle. Four pictures, one word, and every answer points to Jesus."><title>Behold</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Bible games where every answer points to Jesus Christ: journeys through Scripture, a daily challenge, pictures, timelines and word searches.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,6 +241,7 @@ h2.title{font-family:var(--display);font-weight:800;color:var(--gold);font-size:
     <p class="msg" id="wMsg" role="status" style="margin-top:10px"></p>
   </section>
 
+  <div id="installBox" hidden style="margin:16px 0 0;text-align:center"><button class="tool" id="installBtn" type="button">Install Behold on this phone</button><p id="installTip" class="foot" hidden style="margin-top:8px"></p></div>
   <p class="foot">Scripture quotations from the King James Version.</p>
 </div>
 
@@ -1115,4 +1116,15 @@ window.__BEHOLD={Q,LV,LEVELS,THEMES,TIMELINES,STAGES,makeGrid,S,IMG,openJourney,
 show('home');
 })();
 </script>
-</body></html>
+<script>(()=>{const box=document.getElementById('installBox'),btn=document.getElementById('installBtn'),tip=document.getElementById('installTip');
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(standalone||!box)return;
+let ev=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;box.hidden=false;tip.hidden=true});
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+if(ios){box.hidden=false}
+btn.onclick=async()=>{if(ev){ev.prompt();await ev.userChoice.catch(()=>{});ev=null;box.hidden=true;return}
+  tip.hidden=false;tip.textContent=ios?'In Safari, tap the Share button, then "Add to Home Screen".':'Open your browser menu and choose "Install app" or "Add to Home screen".'};
+addEventListener('appinstalled',()=>{box.hidden=true});})();
+</script></body></html>
